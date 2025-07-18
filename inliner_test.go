@@ -1,6 +1,9 @@
 package css_inliner
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -50,6 +53,27 @@ func TestInlineFile(t *testing.T) {
 
 	// Run the inliner
 	result, err := InlineFile(htmlPath)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("Expected %s, got %s", expected, result)
+	}
+}
+
+func TestInlineWithRemoteStylesheet(t *testing.T) {
+	// Create a mock server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/css")
+		w.Write([]byte("body { color: green; }"))
+	}))
+	defer server.Close()
+
+	source := fmt.Sprintf(`<html><head><link rel="stylesheet" href="%s" /></head><body>Hello Remote</body></html>`, server.URL)
+	expected := `<html><head></head><body style="color: green;">Hello Remote</body></html>`
+
+	result, err := Inline(source, WithAllowLoadRemoteStylesheets(true))
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}

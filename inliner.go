@@ -1,8 +1,9 @@
 package css_inliner
 
 import (
-	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -111,8 +112,32 @@ func (inliner *Inliner) parseHTML() error {
 }
 
 func (inliner *Inliner) fetchRemoteStylesheets() error {
-	// TODO: Implement fetching of external stylesheets
-	return errors.New("fetching external stylesheets is not implemented")
+	inliner.doc.Find("link[rel='stylesheet']").Each(func(i int, s *goquery.Selection) {
+		href, exists := s.Attr("href")
+		if !exists {
+			return
+		}
+
+		if urlObj, err := url.Parse(href); err != nil || !urlObj.IsAbs() {
+			return
+		}
+
+		resp, err := http.Get(href)
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+
+		css, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
+
+		style := fmt.Sprintf("<style>%s</style>", string(css))
+		s.ReplaceWithHtml(style)
+	})
+
+	return nil
 }
 
 func (inliner *Inliner) loadLocalStylesheet() error {

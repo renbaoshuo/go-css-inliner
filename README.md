@@ -36,6 +36,8 @@ This package provides these functions:
 
 The available options include:
 
+- `WithAllowLoadRemoteStylesheets(allow bool)`<br />
+  Allows the inliner to fetch remote stylesheets.
 - `WithAllowReadLocalFiles(allow bool, path string)`<br />
   Allows the inliner to fetch local stylesheets from the specified path.
 
