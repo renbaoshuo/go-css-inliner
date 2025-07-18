@@ -6,6 +6,27 @@
 go get go.baoshuo.dev/css-inliner
 ```
 
+## Usage
+
+```go
+package main
+
+import (
+  "go.baoshuo.dev/css-inliner"
+)
+
+func main() {
+  html := `<html><head><style>body { color: red; }</style></head><body>Hello World</body></html>`
+  
+  result, err := css_inliner.Inline(html)
+  if err != nil {
+    panic(err)
+  }
+  
+  println(result)
+}
+```
+
 ## Author
 
 **go-css-inliner** © [Baoshuo](https://baoshuo.ren), Released under the [MIT](./LICENSE) License.
