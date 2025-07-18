@@ -82,3 +82,59 @@ func TestInlineWithRemoteStylesheet(t *testing.T) {
 		t.Errorf("Expected %s, got %s", expected, result)
 	}
 }
+
+func TestInlineWithComplexSelectors(t *testing.T) {
+	source := `<html><head><style>
+		div.container > p { color: red; }
+		ul li:first-child { color: blue; }
+		a[target="_blank"] { text-decoration: none; }
+		h1, h2 { font-weight: bold; }
+		div ~ span { background-color: yellow; }
+	</style></head><body>
+		<div class="container">
+			<p>This is a paragraph.</p>
+			<div>
+				<p>Not a direct child</p>
+				<span>A span</span>
+			</div>
+		</div>
+		<p>This paragraph is not inside the container.</p>
+		<ul>
+			<li>First item</li>
+			<li>Second item</li>
+		</ul>
+		<a href="#" target="_blank">Link</a>
+		<h1>Heading 1</h1>
+		<h2>Heading 2</h2>
+		<span>A sibling span</span>
+	</body></html>`
+	expected := `<html><head></head><body>
+		<div class="container">
+			<p style="color: red;">This is a paragraph.</p>
+			<div>
+				<p>Not a direct child</p>
+				<span>A span</span>
+			</div>
+		</div>
+		<p>This paragraph is not inside the container.</p>
+		<ul>
+			<li style="color: blue;">First item</li>
+			<li>Second item</li>
+		</ul>
+		<a href="#" target="_blank" style="text-decoration: none;">Link</a>
+		<h1 style="font-weight: bold;">Heading 1</h1>
+		<h2 style="font-weight: bold;">Heading 2</h2>
+		<span style="background-color: yellow;">A sibling span</span>
+	</body></html>`
+
+	inliner := NewInliner(source)
+
+	result, err := inliner.Inline()
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("Expected %s, got %s", expected, result)
+	}
+}
