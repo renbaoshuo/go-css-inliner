@@ -1,15 +1,15 @@
-package css_inliner
+package cssinliner
 
 import (
-	css_parser "go.baoshuo.dev/css-parser"
+	cssparser "go.baoshuo.dev/cssparser"
 )
 
 type StyleDeclaration struct {
 	StyleRule   *StyleRule
-	Declaration *css_parser.CssDeclaration
+	Declaration *cssparser.Declaration
 }
 
-func NewStyleDeclaration(styleRule *StyleRule, declaration *css_parser.CssDeclaration) *StyleDeclaration {
+func NewStyleDeclaration(styleRule *StyleRule, declaration *cssparser.Declaration) *StyleDeclaration {
 	return &StyleDeclaration{
 		StyleRule:   styleRule,
 		Declaration: declaration,

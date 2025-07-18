@@ -1,9 +1,9 @@
-# go-css-inliner
+# Go CSS Inliner
 
 ## Installation
 
 ```bash
-go get go.baoshuo.dev/css-inliner
+go get go.baoshuo.dev/cssinliner
 ```
 
 ## Usage
@@ -12,13 +12,13 @@ go get go.baoshuo.dev/css-inliner
 package main
 
 import (
-  "go.baoshuo.dev/css-inliner"
+  "go.baoshuo.dev/cssinliner"
 )
 
 func main() {
   html := `<html><head><style>body { color: red; }</style></head><body>Hello World</body></html>`
 
-  result, err := css_inliner.Inline(html)
+  result, err := cssinliner.Inline(html)
   if err != nil {
     panic(err)
   }

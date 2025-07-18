@@ -1,4 +1,4 @@
-package css_inliner
+package cssinliner
 
 type InlinerOption func(*Inliner)
 

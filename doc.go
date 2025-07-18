@@ -1,5 +1,5 @@
 /*
-Package `css_inliner` provides functionality to inline CSS styles into HTML documents.
+Package `cssinliner` provides functionality to inline CSS styles into HTML documents.
 
 It allows for inlining styles from remote stylesheets, local files, and inline styles within the HTML document itself.
 
@@ -15,4 +15,4 @@ The available options include:
 
 The source code of this package is hosted on GitHub: https://github.com/renbaoshuo/go-css-inliner
 */
-package css_inliner
+package cssinliner

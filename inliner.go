@@ -1,4 +1,4 @@
-package css_inliner
+package cssinliner
 
 import (
 	"fmt"
@@ -11,20 +11,20 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	css_parser "go.baoshuo.dev/css-parser"
+	cssparser "go.baoshuo.dev/cssparser"
 	"golang.org/x/net/html"
 )
 
 const elementMarkerAttr = "data-inliner-marker"
 
 type Inliner struct {
-	html          string                      // Raw HTML content
-	path          string                      // Path to the HTML file
-	doc           *goquery.Document           // Parsed HTML document
-	stylesheets   []*css_parser.CssStylesheet // Parsed CSS stylesheets
-	elements      map[string]*Element         // HTML elements matching collected inlinable style rules
-	rawRules      []fmt.Stringer              // CSS rules that are not inlinable but that must be inserted in output document
-	elementMarker int                         // current element marker value
+	html          string                  // Raw HTML content
+	path          string                  // Path to the HTML file
+	doc           *goquery.Document       // Parsed HTML document
+	stylesheets   []*cssparser.Stylesheet // Parsed CSS stylesheets
+	elements      map[string]*Element     // HTML elements matching collected inlinable style rules
+	rawRules      []fmt.Stringer          // CSS rules that are not inlinable but that must be inserted in output document
+	elementMarker int                     // current element marker value
 
 	allowLoadRemoteStylesheets bool // Whether to allow remote content (e.g., <link rel="stylesheet" href="http://example.com/style.css" />)
 	allowReadLocalFiles        bool // Whether to allow local files (e.g., <link rel="stylesheet" href="/path/to/local/file.css" />)
@@ -174,7 +174,7 @@ func (inliner *Inliner) parseStylesheets() error {
 	var result error
 
 	inliner.doc.Find("style").EachWithBreak(func(i int, s *goquery.Selection) bool {
-		stylesheet, err := css_parser.ParseStylesheet(s.Text())
+		stylesheet, err := cssparser.ParseStylesheet(s.Text())
 		if err != nil {
 			result = err
 			return false
@@ -194,7 +194,7 @@ func (inliner *Inliner) parseStylesheets() error {
 func (inliner *Inliner) collectElementsAndRules() {
 	for _, stylesheet := range inliner.stylesheets {
 		for _, rule := range stylesheet.Rules {
-			if rule.Kind == css_parser.QualifiedRule {
+			if rule.Kind == cssparser.QualifiedRule {
 				inliner.handleQualifiedRule(rule)
 			} else {
 				inliner.rawRules = append(inliner.rawRules, rule)
@@ -203,7 +203,7 @@ func (inliner *Inliner) collectElementsAndRules() {
 	}
 }
 
-func (inliner *Inliner) handleQualifiedRule(rule *css_parser.CssRule) {
+func (inliner *Inliner) handleQualifiedRule(rule *cssparser.CssRule) {
 	for _, selector := range rule.Selectors {
 		if Inlinable(selector) {
 			inliner.doc.Find(selector).Each(func(i int, s *goquery.Selection) {

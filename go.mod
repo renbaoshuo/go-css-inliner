@@ -1,4 +1,4 @@
-module go.baoshuo.dev/css-inliner
+module go.baoshuo.dev/cssinliner
 
 go 1.23.0
 
@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
-	go.baoshuo.dev/css-parser v0.0.4
+	go.baoshuo.dev/cssparser v0.0.7
 	golang.org/x/net v0.42.0
 )
 

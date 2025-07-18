@@ -1,10 +1,10 @@
-package css_inliner
+package cssinliner
 
 import (
 	"fmt"
 	"regexp"
 
-	css_parser "go.baoshuo.dev/css-parser"
+	cssparser "go.baoshuo.dev/cssparser"
 )
 
 const (
@@ -31,12 +31,12 @@ var (
 
 // StyleRule represents a Qualifier Rule for a uniq selector
 type StyleRule struct {
-	Selector     string                       // The style rule selector
-	Declarations []*css_parser.CssDeclaration // The style rule properties
-	Specificity  int                          // Selector specificity
+	Selector     string                   // The style rule selector
+	Declarations []*cssparser.Declaration // The style rule properties
+	Specificity  int                      // Selector specificity
 }
 
-func NewStyleRule(selector string, declarations []*css_parser.CssDeclaration) *StyleRule {
+func NewStyleRule(selector string, declarations []*cssparser.Declaration) *StyleRule {
 	return &StyleRule{
 		Selector:     selector,
 		Declarations: declarations,

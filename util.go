@@ -1,9 +1,9 @@
-package css_inliner
+package cssinliner
 
 import (
 	"strings"
 
-	css_parser "go.baoshuo.dev/css-parser"
+	cssparser "go.baoshuo.dev/cssparser"
 )
 
 // TODO: Get list of supported pseudo selectors from "github.com/andybalholm/cascadia" package
@@ -28,7 +28,7 @@ func Inlinable(selector string) bool {
 	return true
 }
 
-func computeStyleValue(declarations []*css_parser.CssDeclaration) string {
+func computeStyleValue(declarations []*cssparser.Declaration) string {
 	result := ""
 
 	// set style attribute value

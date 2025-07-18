@@ -1,11 +1,11 @@
-package css_inliner
+package cssinliner
 
 import (
 	"slices"
 	"sort"
 
 	"github.com/PuerkitoBio/goquery"
-	css_parser "go.baoshuo.dev/css-parser"
+	cssparser "go.baoshuo.dev/cssparser"
 )
 
 type Element struct {
@@ -77,8 +77,8 @@ func (element *Element) inline() error {
 	return nil
 }
 
-func (element *Element) computeDeclarations() ([]*css_parser.CssDeclaration, error) {
-	result := []*css_parser.CssDeclaration{}
+func (element *Element) computeDeclarations() ([]*cssparser.Declaration, error) {
+	result := []*cssparser.Declaration{}
 
 	styles := make(map[string]*StyleDeclaration)
 
@@ -106,14 +106,14 @@ func (element *Element) computeDeclarations() ([]*css_parser.CssDeclaration, err
 	}
 
 	// sort declarations by property name
-	sort.Sort(css_parser.DeclarationsByProperty(result))
+	sort.Sort(cssparser.DeclarationsByProperty(result))
 
 	return result, nil
 }
 
 func (element *Element) parseAttributes() ([]*StyleRule, error) {
 	result := []*StyleRule{}
-	declarations := []*css_parser.CssDeclaration{}
+	declarations := []*cssparser.Declaration{}
 
 	for attr, rules := range attrToStyle {
 		value, exists := element.element.Attr(attr)
@@ -123,7 +123,7 @@ func (element *Element) parseAttributes() ([]*StyleRule, error) {
 
 		for _, rule := range rules {
 			if slices.Contains(rule.elements, element.element.Nodes[0].Data) {
-				declarations = append(declarations, &css_parser.CssDeclaration{
+				declarations = append(declarations, &cssparser.Declaration{
 					Property: rule.styleName,
 					Value:    value,
 				})
@@ -146,7 +146,7 @@ func (element *Element) parseInlineStyle() ([]*StyleRule, error) {
 		return result, nil
 	}
 
-	declarations, err := css_parser.ParseDeclarations(styleValue)
+	declarations, err := cssparser.ParseDeclarations(styleValue)
 	if err != nil {
 		return result, err
 	}

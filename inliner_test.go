@@ -1,4 +1,4 @@
-package css_inliner
+package cssinliner
 
 import (
 	"fmt"
