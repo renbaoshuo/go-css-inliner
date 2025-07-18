@@ -27,6 +27,11 @@ func main() {
 }
 ```
 
+## Credits
+
+- https://github.com/aymerick/douceur
+- https://github.com/PuerkitoBio/goquery
+
 ## Author
 
 **go-css-inliner** © [Baoshuo](https://baoshuo.ren), Released under the [MIT](./LICENSE) License.
