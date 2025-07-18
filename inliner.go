@@ -3,6 +3,9 @@ package css_inliner
 import (
 	"errors"
 	"fmt"
+	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -22,8 +25,8 @@ type Inliner struct {
 	rawRules      []fmt.Stringer              // CSS rules that are not inlinable but that must be inserted in output document
 	elementMarker int                         // current element marker value
 
-	allowRemoteContent bool // Whether to allow remote content (e.g., <link rel="stylesheet" href="http://example.com/style.css" />)
-	allowLocalFiles    bool // Whether to allow local files (e.g., <link rel="stylesheet" href="/path/to/local/file.css" />)
+	allowLoadRemoteStylesheets bool // Whether to allow remote content (e.g., <link rel="stylesheet" href="http://example.com/style.css" />)
+	allowReadLocalFiles        bool // Whether to allow local files (e.g., <link rel="stylesheet" href="/path/to/local/file.css" />)
 }
 
 func NewInliner(html string, options ...InlinerOption) *Inliner {
@@ -49,29 +52,50 @@ func Inline(html string, options ...InlinerOption) (string, error) {
 	return result, nil
 }
 
+func InlineFile(path string, options ...InlinerOption) (string, error) {
+	html, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file %s: %w", path, err)
+	}
+
+	return NewInliner(string(html), append(options, WithAllowReadLocalFiles(true, path))...).Inline()
+}
+
 func (inliner *Inliner) Inline() (string, error) {
+	// Step 1: Parse the HTML document
 	if err := inliner.parseHTML(); err != nil {
 		return "", err
 	}
 
-	if inliner.allowRemoteContent {
-		if err := inliner.fetchExternalStylesheets(); err != nil {
+	// Step 2: Fetch remote stylesheets and load local stylesheets if allowed
+	if inliner.allowLoadRemoteStylesheets {
+		if err := inliner.fetchRemoteStylesheets(); err != nil {
 			return "", fmt.Errorf("failed to fetch external stylesheets: %w", err)
 		}
 	}
+	if inliner.allowReadLocalFiles {
+		if err := inliner.loadLocalStylesheet(); err != nil {
+			return "", fmt.Errorf("failed to load local stylesheets: %w", err)
+		}
+	}
 
+	// Step 3: Parse stylesheets from the document
 	if err := inliner.parseStylesheets(); err != nil {
 		return "", err
 	}
 
+	// Step 4: Collect elements and rules
 	inliner.collectElementsAndRules()
 
+	// Step 5: Inline style rules into elements
 	if err := inliner.inlineStyleRules(); err != nil {
 		return "", err
 	}
 
+	// Step 6: Compute raw CSS rules that are not inlinable
 	inliner.insertRawStylesheet()
 
+	// Step 7: Generate the final HTML output
 	return inliner.genHTML()
 }
 
@@ -86,9 +110,39 @@ func (inliner *Inliner) parseHTML() error {
 	return nil
 }
 
-func (inliner *Inliner) fetchExternalStylesheets() error {
+func (inliner *Inliner) fetchRemoteStylesheets() error {
 	// TODO: Implement fetching of external stylesheets
 	return errors.New("fetching external stylesheets is not implemented")
+}
+
+func (inliner *Inliner) loadLocalStylesheet() error {
+	if inliner.path == "" {
+		return nil
+	}
+
+	dir := filepath.Dir(inliner.path)
+
+	inliner.doc.Find("link[rel='stylesheet']").Each(func(i int, s *goquery.Selection) {
+		href, exists := s.Attr("href")
+		if !exists {
+			return // Skip if href attribute is not present
+		}
+
+		if parsedUrl, err := url.Parse(href); err != nil || parsedUrl.IsAbs() {
+			return // Skip if the href is not a relative path, meaning it's not a local file
+		}
+
+		cssPath := filepath.Join(dir, href)
+		css, err := os.ReadFile(cssPath)
+		if err != nil {
+			return
+		}
+
+		style := fmt.Sprintf("<style>%s</style>", string(css))
+		s.ReplaceWithHtml(style)
+	})
+
+	return nil
 }
 
 func (inliner *Inliner) parseStylesheets() error {

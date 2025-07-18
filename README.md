@@ -17,15 +17,27 @@ import (
 
 func main() {
   html := `<html><head><style>body { color: red; }</style></head><body>Hello World</body></html>`
-  
+
   result, err := css_inliner.Inline(html)
   if err != nil {
     panic(err)
   }
-  
+
   println(result)
 }
 ```
+
+This package provides these functions:
+
+- `Inline(html string, options... InlinerOption) (string, error)`<br />
+  Inlines CSS styles into the provided HTML string.
+- `InlineFile(path string, options... InlinerOption) (string, error)`<br />
+  Reads an HTML file from the specified path and inlines CSS styles into it.
+
+The available options include:
+
+- `WithAllowReadLocalFiles(allow bool, path string)`<br />
+  Allows the inliner to fetch local stylesheets from the specified path.
 
 ## Credits
 

@@ -2,17 +2,17 @@ package css_inliner
 
 type InlinerOption func(*Inliner)
 
-// WithAllowRemoteContent allows the inliner to fetch remote stylesheets.
-func WithAllowRemoteContent(allow bool) InlinerOption {
+// WithAllowLoadRemoteStylesheets allows the inliner to fetch remote stylesheets.
+func WithAllowLoadRemoteStylesheets(allow bool) InlinerOption {
 	return func(inliner *Inliner) {
-		inliner.allowRemoteContent = allow
+		inliner.allowLoadRemoteStylesheets = allow
 	}
 }
 
-// WithAllowLocalFiles allows the inliner to fetch local stylesheets.
-func WithAllowLocalFiles(allow bool, path string) InlinerOption {
+// WithAllowReadLocalFiles allows the inliner to fetch local stylesheets.
+func WithAllowReadLocalFiles(allow bool, path string) InlinerOption {
 	return func(inliner *Inliner) {
-		inliner.allowLocalFiles = allow
+		inliner.allowReadLocalFiles = allow
 		inliner.path = path
 	}
 }
