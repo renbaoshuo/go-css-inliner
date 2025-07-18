@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-go get github.com/renbaoshuo/go-css-inliner
+go get go.baoshuo.dev/css-inliner
 ```
 
 ## Author

@@ -1,3 +1,3 @@
-module github.com/renbaoshuo/go-css-inliner
+module go.baoshuo.dev/css-inliner
 
 go 1.24.4
