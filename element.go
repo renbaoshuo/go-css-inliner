@@ -9,8 +9,9 @@ import (
 )
 
 type Element struct {
-	element    *goquery.Selection // The goquery handler
-	styleRules []*StyleRule       // The style rules to apply on that element
+	element       *goquery.Selection // The goquery handler
+	styleRules    []*StyleRule       // The style rules to apply on that element
+	parserOptions []cssparser.ParserOption
 }
 
 type AttrToStyleRule struct {
@@ -51,9 +52,10 @@ var attrToStyle = map[string][]*AttrToStyleRule{
 	}},
 }
 
-func NewElement(element *goquery.Selection) *Element {
+func NewElement(element *goquery.Selection, parserOptions ...cssparser.ParserOption) *Element {
 	return &Element{
-		element: element,
+		element:       element,
+		parserOptions: parserOptions,
 	}
 }
 
@@ -142,11 +144,11 @@ func (element *Element) parseInlineStyle() ([]*StyleRule, error) {
 	result := []*StyleRule{}
 
 	styleValue, exists := element.element.Attr("style")
-	if (styleValue == "") || !exists {
+	if !exists || styleValue == "" {
 		return result, nil
 	}
 
-	declarations, err := cssparser.ParseDeclarations(styleValue)
+	declarations, err := cssparser.ParseDeclarations(styleValue, element.parserOptions...)
 	if err != nil {
 		return result, err
 	}

@@ -26,8 +26,9 @@ type Inliner struct {
 	rawRules      []fmt.Stringer          // CSS rules that are not inlinable but that must be inserted in output document
 	elementMarker int                     // current element marker value
 
-	allowLoadRemoteStylesheets bool // Whether to allow remote content (e.g., <link rel="stylesheet" href="http://example.com/style.css" />)
-	allowReadLocalFiles        bool // Whether to allow local files (e.g., <link rel="stylesheet" href="/path/to/local/file.css" />)
+	parserOptions              []cssparser.ParserOption // CSS parser options
+	allowLoadRemoteStylesheets bool                     // Whether to allow remote content (e.g., <link rel="stylesheet" href="http://example.com/style.css" />)
+	allowReadLocalFiles        bool                     // Whether to allow local files (e.g., <link rel="stylesheet" href="/path/to/local/file.css" />)
 }
 
 func NewInliner(html string, options ...InlinerOption) *Inliner {
@@ -174,7 +175,7 @@ func (inliner *Inliner) parseStylesheets() error {
 	var result error
 
 	inliner.doc.Find("style").EachWithBreak(func(i int, s *goquery.Selection) bool {
-		stylesheet, err := cssparser.ParseStylesheet(s.Text())
+		stylesheet, err := cssparser.ParseStylesheet(s.Text(), inliner.parserOptions...)
 		if err != nil {
 			result = err
 			return false
@@ -216,7 +217,7 @@ func (inliner *Inliner) handleQualifiedRule(rule *cssparser.CssRule) {
 					inliner.elementMarker++
 
 					// add new element
-					inliner.elements[eltMarker] = NewElement(s)
+					inliner.elements[eltMarker] = NewElement(s, inliner.parserOptions...)
 				}
 
 				// add style rule for element

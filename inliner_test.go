@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"go.baoshuo.dev/cssparser"
 )
 
 func TestInline(t *testing.T) {
@@ -130,6 +132,32 @@ func TestInlineWithComplexSelectors(t *testing.T) {
 	inliner := NewInliner(source)
 
 	result, err := inliner.Inline()
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if result != expected {
+		t.Errorf("Expected %s, got %s", expected, result)
+	}
+}
+
+func TestInlineWithBrokenCSS(t *testing.T) {
+	source := `<html><head><style>
+	.name {
+		color: red;
+		background-co
+		border-radius: 5px;
+		border: 1px solid #fff;
+	}
+	几个无效字符
+	</style></head><body>
+		<div class="name" style="color: blue;">Hello</div>
+	</body></html>`
+	expected := `<html><head></head><body>
+		<div class="name" style="border: 1px solid #fff; color: blue;">Hello</div>
+	</body></html>`
+
+	result, err := Inline(source, WithParserOptions(cssparser.WithLooseParsing(true)))
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}

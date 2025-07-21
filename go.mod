@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
-	go.baoshuo.dev/cssparser v0.0.7
+	go.baoshuo.dev/cssparser v0.0.9
 	golang.org/x/net v0.42.0
 )
 
