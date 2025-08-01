@@ -29,6 +29,8 @@ type Inliner struct {
 	parserOptions              []cssparser.ParserOption // CSS parser options
 	allowLoadRemoteStylesheets bool                     // Whether to allow remote content (e.g., <link rel="stylesheet" href="http://example.com/style.css" />)
 	allowReadLocalFiles        bool                     // Whether to allow local files (e.g., <link rel="stylesheet" href="/path/to/local/file.css" />)
+	htmlPreprocessor           HtmlPreprocessor         // Optional HTML preprocessor function to modify HTML before processing
+	cssFilePreprocessor        CssFilePreprocessor      // Optional CSS preprocessor function to modify CSS before inlining
 }
 
 func NewInliner(html string, options ...InlinerOption) *Inliner {
@@ -64,6 +66,15 @@ func InlineFile(path string, options ...InlinerOption) (string, error) {
 }
 
 func (inliner *Inliner) Inline() (string, error) {
+	// If an HTML preprocessor is provided, apply it to the HTML content
+	if inliner.htmlPreprocessor != nil {
+		processedHTML, err := inliner.htmlPreprocessor(inliner.html, inliner.path)
+		if err != nil {
+			return "", fmt.Errorf("failed to preprocess HTML: %w", err)
+		}
+		inliner.html = processedHTML
+	}
+
 	// Step 1: Parse the HTML document
 	if err := inliner.parseHTML(); err != nil {
 		return "", err
@@ -129,12 +140,23 @@ func (inliner *Inliner) fetchRemoteStylesheets() error {
 		}
 		defer resp.Body.Close()
 
-		css, err := io.ReadAll(resp.Body)
+		cssBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return
 		}
 
-		style := fmt.Sprintf("<style>%s</style>", string(css))
+		var css string
+		if inliner.cssFilePreprocessor != nil {
+			processedCss, err := inliner.cssFilePreprocessor(string(css), href)
+			if err != nil {
+				return
+			}
+			css = processedCss
+		} else {
+			css = string(cssBytes)
+		}
+
+		style := fmt.Sprintf("<style>%s</style>", css)
 		s.ReplaceWithHtml(style)
 	})
 
@@ -159,12 +181,23 @@ func (inliner *Inliner) loadLocalStylesheet() error {
 		}
 
 		cssPath := filepath.Join(dir, href)
-		css, err := os.ReadFile(cssPath)
+		cssBytes, err := os.ReadFile(cssPath)
 		if err != nil {
 			return
 		}
 
-		style := fmt.Sprintf("<style>%s</style>", string(css))
+		var css string
+		if inliner.cssFilePreprocessor != nil {
+			processedCss, err := inliner.cssFilePreprocessor(string(cssBytes), cssPath)
+			if err != nil {
+				return
+			}
+			css = processedCss
+		} else {
+			css = string(cssBytes)
+		}
+
+		style := fmt.Sprintf("<style>%s</style>", css)
 		s.ReplaceWithHtml(style)
 	})
 
