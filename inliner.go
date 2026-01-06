@@ -214,6 +214,10 @@ func (inliner *Inliner) parseStylesheets() error {
 			return false
 		}
 
+		if stylesheet == nil {
+			return true
+		}
+
 		inliner.stylesheets = append(inliner.stylesheets, stylesheet)
 
 		// removes parsed stylesheet
