@@ -1,13 +1,11 @@
 module go.baoshuo.dev/cssinliner
 
-go 1.23.0
-
-toolchain go1.24.4
+go 1.25.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
 	go.baoshuo.dev/cssparser v0.0.9
-	golang.org/x/net v0.42.0
+	golang.org/x/net v0.55.0
 )
 
 require (
